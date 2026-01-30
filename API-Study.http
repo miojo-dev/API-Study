@@ -1,0 +1,6 @@
+@API_Study_HostAddress = http://localhost:5138
+
+GET {{API_Study_HostAddress}}/product
+Accept: application/json
+
+###
