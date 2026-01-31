@@ -5,9 +5,9 @@ namespace API_Study.Controllers;
 
 public record Product
 {
-    public int index;
-    public string name;
-    public string? description;
+    public int index {get; set;}
+    public string name {get; set;}
+    public string? description {get; set;}
 }
 
 public class ProductController : ControllerBase
@@ -31,6 +31,14 @@ public class ProductController : ControllerBase
     [Route("/products")]
     public ActionResult<Product> Post([FromBody] Product newProduct)
     {
+        // Debug Console
+        // Console.WriteLine($"=== DEBUG ===");
+        // Console.WriteLine($"newProduct is null? {newProduct == null}");
+        // Console.WriteLine($"newProduct.name is null? {newProduct?.name == null}");
+        // Console.WriteLine($"Request Content-Type: {Request.ContentType}");
+        // Console.WriteLine($"newProduct: {newProduct}");
+        // Console.WriteLine($"=== END DEBUG ===");
+        
         string invalidPattern = "(?:(?:[;'\"\\\\/A-Z*])|--)";
         Regex regex = new Regex(invalidPattern);
 
@@ -38,17 +46,30 @@ public class ProductController : ControllerBase
         {
             if (string.IsNullOrEmpty(newProduct.name))
             {
-                return BadRequest("Name field must have a value grater than null");
+                return BadRequest("Name field is required");
             }
 
             if (regex.IsMatch(newProduct.name))
             {
                 var charsFound = regex.Matches(newProduct.name)
                     .Select(m => m.Value).Distinct().ToList();
-
-                string errorMsg = $"{{string.Join(\", \", charsFound)}}, characters were found and are not allowed";
+                
+                string errorMsg = $"{string.Join(", ", charsFound)}, characters were found and are not allowed";
                 
                 return BadRequest(errorMsg);
+            }
+
+            if (!string.IsNullOrEmpty(newProduct.description))
+            {
+                if (regex.IsMatch(newProduct.description!))
+                {
+                    var charsFound = regex.Matches(newProduct.description!)
+                        .Select(m => m.Value).Distinct().ToList();
+                    
+                    string errorMsg = $"{string.Join(", ", charsFound)}, characters were found and are not allowed";
+                    
+                    return BadRequest(errorMsg);
+                }
             }
 
             newProduct.index = _nextIndex++;
